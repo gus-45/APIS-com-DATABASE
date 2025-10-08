@@ -30,9 +30,9 @@ export class UserBusiness {
         throw new Error("E-mail já cadastrado");
       }
 
-      const id = await this.userData.createUser(name, email);
+      const user = await this.userData.createUser(name, email);
       
-      return { id, name, email };
+      return user;
     } catch (error: any) {
       throw error;
     }

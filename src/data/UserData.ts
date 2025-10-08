@@ -31,8 +31,16 @@ export class UserData {
 
   async createUser(name: string, email: string) {
     try {
-      const [id] = await connection("users").insert({ name, email });
-      return id;
+      const result = await connection("users").insert({ name, email }).returning("*");
+      
+      // PostgreSQL retorna o objeto completo, MySQL retorna apenas o ID
+      if (Array.isArray(result) && result.length > 0) {
+        return result[0]; // PostgreSQL
+      }
+      
+      // MySQL: buscar o usuário recém-criado
+      const user = await connection("users").where({ email }).first();
+      return user;
     } catch (error: any) {
       throw new Error(error.sqlMessage || error.message);
     }
