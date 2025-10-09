@@ -211,10 +211,7 @@ export class UserController {
       const idNumber = Number(id);
       await this.userBusiness.deleteUser(idNumber);
 
-      res.status(200).json({
-        success: true,
-        message: "Usuário deletado com sucesso",
-      });
+      res.status(204).send();
     } catch (error: any) {
       if (error.message === "Usuário não encontrado") {
         return res.status(404).json({
