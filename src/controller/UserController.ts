@@ -7,11 +7,17 @@ export class UserController {
   public getById = async (req: Request, res: Response) => {
     try {
       const id = req.params.id;
+      const errors: string[] = [];
 
       if (!id || isNaN(Number(id))) {
+        errors.push("ID do usuário é obrigatório e deve ser um número");
+      }
+
+      if (errors.length > 0) {
         return res.status(400).json({
           success: false,
-          message: "ID do usuário é obrigatório e deve ser um número",
+          message: "Erro de validação",
+          errors: errors,
         });
       }
 
@@ -22,6 +28,7 @@ export class UserController {
         return res.status(404).json({
           success: false,
           message: "Usuário não encontrado",
+          errors: ["Usuário não encontrado"],
         });
       }
 
@@ -34,7 +41,7 @@ export class UserController {
       res.status(500).json({
         success: false,
         message: "Erro ao buscar usuário",
-        error: error.message,
+        errors: [error.message],
       });
     }
   };
@@ -53,7 +60,7 @@ export class UserController {
       res.status(500).json({
         success: false,
         message: "Erro ao listar usuários",
-        error: error.message,
+        errors: [error.message],
       });
     }
   };
@@ -61,25 +68,37 @@ export class UserController {
   public create = async (req: Request, res: Response) => {
     try {
       const { name, email } = req.body;
+      const errors: string[] = [];
 
-      if (!name || !email) {
-        return res.status(400).json({
-          success: false,
-          message: "Nome e e-mail são obrigatórios",
-        });
+      if (!name) {
+        errors.push("Nome é obrigatório");
       }
 
-      if (typeof name !== "string" || typeof email !== "string") {
-        return res.status(400).json({
-          success: false,
-          message: "Nome e e-mail devem ser strings",
-        });
+      if (!email) {
+        errors.push("E-mail é obrigatório");
       }
 
-      if (name.trim() === "" || email.trim() === "") {
+      if (name && typeof name !== "string") {
+        errors.push("Nome deve ser uma string");
+      }
+
+      if (email && typeof email !== "string") {
+        errors.push("E-mail deve ser uma string");
+      }
+
+      if (name && typeof name === "string" && name.trim() === "") {
+        errors.push("Nome não pode ser vazio");
+      }
+
+      if (email && typeof email === "string" && email.trim() === "") {
+        errors.push("E-mail não pode ser vazio");
+      }
+
+      if (errors.length > 0) {
         return res.status(400).json({
           success: false,
-          message: "Nome e e-mail não podem ser vazios",
+          message: "Erro de validação",
+          errors: errors,
         });
       }
 
@@ -94,13 +113,14 @@ export class UserController {
       if (error.message === "E-mail já cadastrado") {
         return res.status(409).json({
           success: false,
-          message: error.message,
+          message: "Conflito",
+          errors: [error.message],
         });
       }
       res.status(500).json({
         success: false,
         message: "Erro ao criar usuário",
-        error: error.message,
+        errors: [error.message],
       });
     }
   };
@@ -109,32 +129,41 @@ export class UserController {
     try {
       const id = req.params.id;
       const { name, email } = req.body;
+      const errors: string[] = [];
 
       if (!id || isNaN(Number(id))) {
-        return res.status(400).json({
-          success: false,
-          message: "ID do usuário é obrigatório e deve ser um número",
-        });
+        errors.push("ID do usuário é obrigatório e deve ser um número");
       }
 
-      if (!name || !email) {
-        return res.status(400).json({
-          success: false,
-          message: "Nome e e-mail são obrigatórios",
-        });
+      if (!name) {
+        errors.push("Nome é obrigatório");
       }
 
-      if (typeof name !== "string" || typeof email !== "string") {
-        return res.status(400).json({
-          success: false,
-          message: "Nome e e-mail devem ser strings",
-        });
+      if (!email) {
+        errors.push("E-mail é obrigatório");
       }
 
-      if (name.trim() === "" || email.trim() === "") {
+      if (name && typeof name !== "string") {
+        errors.push("Nome deve ser uma string");
+      }
+
+      if (email && typeof email !== "string") {
+        errors.push("E-mail deve ser uma string");
+      }
+
+      if (name && typeof name === "string" && name.trim() === "") {
+        errors.push("Nome não pode ser vazio");
+      }
+
+      if (email && typeof email === "string" && email.trim() === "") {
+        errors.push("E-mail não pode ser vazio");
+      }
+
+      if (errors.length > 0) {
         return res.status(400).json({
           success: false,
-          message: "Nome e e-mail não podem ser vazios",
+          message: "Erro de validação",
+          errors: errors,
         });
       }
 
@@ -150,13 +179,14 @@ export class UserController {
       if (error.message === "Usuário não encontrado") {
         return res.status(404).json({
           success: false,
-          message: error.message,
+          message: "Usuário não encontrado",
+          errors: [error.message],
         });
       }
       res.status(500).json({
         success: false,
         message: "Erro ao atualizar usuário",
-        error: error.message,
+        errors: [error.message],
       });
     }
   };
@@ -164,11 +194,17 @@ export class UserController {
   public delete = async (req: Request, res: Response) => {
     try {
       const id = req.params.id;
+      const errors: string[] = [];
 
       if (!id || isNaN(Number(id))) {
+        errors.push("ID do usuário é obrigatório e deve ser um número");
+      }
+
+      if (errors.length > 0) {
         return res.status(400).json({
           success: false,
-          message: "ID do usuário é obrigatório e deve ser um número",
+          message: "Erro de validação",
+          errors: errors,
         });
       }
 
@@ -183,19 +219,21 @@ export class UserController {
       if (error.message === "Usuário não encontrado") {
         return res.status(404).json({
           success: false,
-          message: error.message,
+          message: "Usuário não encontrado",
+          errors: [error.message],
         });
       }
       if (error.message === "Não é possível excluir usuário com pets vinculados") {
         return res.status(409).json({
           success: false,
-          message: error.message,
+          message: "Conflito",
+          errors: [error.message],
         });
       }
       res.status(500).json({
         success: false,
         message: "Erro ao deletar usuário",
-        error: error.message,
+        errors: [error.message],
       });
     }
   };
