@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { UserBusiness } from "../business/UserBusiness";
+import { PetBusiness } from "../business/PetBusiness";
 
-export class UserController {
-  userBusiness = new UserBusiness();
+export class PetController {
+  petBusiness = new PetBusiness();
 
   public getById = async (req: Request, res: Response) => {
     try {
@@ -10,7 +10,7 @@ export class UserController {
       const errors: string[] = [];
 
       if (!id || isNaN(Number(id))) {
-        errors.push("ID do usuário é obrigatório e deve ser um número");
+        errors.push("ID do pet é obrigatório e deve ser um número");
       }
 
       if (errors.length > 0) {
@@ -22,25 +22,25 @@ export class UserController {
       }
 
       const idNumber = Number(id);
-      const user = await this.userBusiness.getUserById(idNumber);
+      const pet = await this.petBusiness.getPetById(idNumber);
 
-      if (!user) {
+      if (!pet) {
         return res.status(404).json({
           success: false,
-          message: "Usuário não encontrado",
-          errors: ["Usuário não encontrado"],
+          message: "Pet não encontrado",
+          errors: ["Pet não encontrado"],
         });
       }
 
       res.status(200).json({
         success: true,
-        message: "Usuário encontrado com sucesso",
-        data: user,
+        message: "Pet encontrado com sucesso",
+        data: pet,
       });
     } catch (error: any) {
       res.status(500).json({
         success: false,
-        message: "Erro ao buscar usuário",
+        message: "Erro ao buscar pet",
         errors: [error.message],
       });
     }
@@ -48,18 +48,18 @@ export class UserController {
 
   public getAll = async (req: Request, res: Response) => {
     try {
-      const users = await this.userBusiness.getAllUsers();
+      const pets = await this.petBusiness.getAllPets();
 
       res.status(200).json({
         success: true,
-        message: "Usuários listados com sucesso",
-        data: users,
-        total: users.length,
+        message: "Pets listados com sucesso",
+        data: pets,
+        total: pets.length,
       });
     } catch (error: any) {
       res.status(500).json({
         success: false,
-        message: "Erro ao listar usuários",
+        message: "Erro ao listar pets",
         errors: [error.message],
       });
     }
@@ -67,31 +67,27 @@ export class UserController {
 
   public create = async (req: Request, res: Response) => {
     try {
-      const { name, email } = req.body;
+      const { name, user_id } = req.body;
       const errors: string[] = [];
 
       if (!name) {
         errors.push("Nome é obrigatório");
       }
 
-      if (!email) {
-        errors.push("E-mail é obrigatório");
+      if (!user_id) {
+        errors.push("user_id é obrigatório");
       }
 
       if (name && typeof name !== "string") {
         errors.push("Nome deve ser uma string");
       }
 
-      if (email && typeof email !== "string") {
-        errors.push("E-mail deve ser uma string");
-      }
-
       if (name && typeof name === "string" && name.trim() === "") {
         errors.push("Nome não pode ser vazio");
       }
 
-      if (email && typeof email === "string" && email.trim() === "") {
-        errors.push("E-mail não pode ser vazio");
+      if (user_id && isNaN(Number(user_id))) {
+        errors.push("user_id deve ser um número");
       }
 
       if (errors.length > 0) {
@@ -102,24 +98,25 @@ export class UserController {
         });
       }
 
-      const user = await this.userBusiness.createUser(name, email);
+      const userIdNumber = Number(user_id);
+      const pet = await this.petBusiness.createPet(name, userIdNumber);
 
       res.status(201).json({
         success: true,
-        message: "Usuário criado com sucesso",
-        data: user,
+        message: "Pet criado com sucesso",
+        data: pet,
       });
     } catch (error: any) {
-      if (error.message === "E-mail já cadastrado") {
-        return res.status(409).json({
+      if (error.message === "user_id inválido") {
+        return res.status(400).json({
           success: false,
-          message: "Conflito",
+          message: "Erro de validação",
           errors: [error.message],
         });
       }
       res.status(500).json({
         success: false,
-        message: "Erro ao criar usuário",
+        message: "Erro ao criar pet",
         errors: [error.message],
       });
     }
@@ -128,35 +125,31 @@ export class UserController {
   public update = async (req: Request, res: Response) => {
     try {
       const id = req.params.id;
-      const { name, email } = req.body;
+      const { name, user_id } = req.body;
       const errors: string[] = [];
 
       if (!id || isNaN(Number(id))) {
-        errors.push("ID do usuário é obrigatório e deve ser um número");
+        errors.push("ID do pet é obrigatório e deve ser um número");
       }
 
       if (!name) {
         errors.push("Nome é obrigatório");
       }
 
-      if (!email) {
-        errors.push("E-mail é obrigatório");
+      if (!user_id) {
+        errors.push("user_id é obrigatório");
       }
 
       if (name && typeof name !== "string") {
         errors.push("Nome deve ser uma string");
       }
 
-      if (email && typeof email !== "string") {
-        errors.push("E-mail deve ser uma string");
-      }
-
       if (name && typeof name === "string" && name.trim() === "") {
         errors.push("Nome não pode ser vazio");
       }
 
-      if (email && typeof email === "string" && email.trim() === "") {
-        errors.push("E-mail não pode ser vazio");
+      if (user_id && isNaN(Number(user_id))) {
+        errors.push("user_id deve ser um número");
       }
 
       if (errors.length > 0) {
@@ -168,24 +161,32 @@ export class UserController {
       }
 
       const idNumber = Number(id);
-      const user = await this.userBusiness.updateUser(idNumber, name, email);
+      const userIdNumber = Number(user_id);
+      const pet = await this.petBusiness.updatePet(idNumber, name, userIdNumber);
 
       res.status(200).json({
         success: true,
-        message: "Usuário atualizado com sucesso",
-        data: user,
+        message: "Pet atualizado com sucesso",
+        data: pet,
       });
     } catch (error: any) {
-      if (error.message === "Usuário não encontrado") {
+      if (error.message === "Pet não encontrado") {
         return res.status(404).json({
           success: false,
-          message: "Usuário não encontrado",
+          message: "Pet não encontrado",
+          errors: [error.message],
+        });
+      }
+      if (error.message === "user_id inválido") {
+        return res.status(400).json({
+          success: false,
+          message: "Erro de validação",
           errors: [error.message],
         });
       }
       res.status(500).json({
         success: false,
-        message: "Erro ao atualizar usuário",
+        message: "Erro ao atualizar pet",
         errors: [error.message],
       });
     }
@@ -197,7 +198,7 @@ export class UserController {
       const errors: string[] = [];
 
       if (!id || isNaN(Number(id))) {
-        errors.push("ID do usuário é obrigatório e deve ser um número");
+        errors.push("ID do pet é obrigatório e deve ser um número");
       }
 
       if (errors.length > 0) {
@@ -209,27 +210,20 @@ export class UserController {
       }
 
       const idNumber = Number(id);
-      await this.userBusiness.deleteUser(idNumber);
+      await this.petBusiness.deletePet(idNumber);
 
       res.status(204).send();
     } catch (error: any) {
-      if (error.message === "Usuário não encontrado") {
+      if (error.message === "Pet não encontrado") {
         return res.status(404).json({
           success: false,
-          message: "Usuário não encontrado",
-          errors: [error.message],
-        });
-      }
-      if (error.message === "Não é possível excluir usuário com pets vinculados") {
-        return res.status(409).json({
-          success: false,
-          message: "Conflito",
+          message: "Pet não encontrado",
           errors: [error.message],
         });
       }
       res.status(500).json({
         success: false,
-        message: "Erro ao deletar usuário",
+        message: "Erro ao deletar pet",
         errors: [error.message],
       });
     }
