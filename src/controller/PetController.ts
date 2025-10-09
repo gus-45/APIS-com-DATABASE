@@ -35,4 +35,36 @@ export class PetController {
       res.status(500).send({ error: error.message });
     }
   };
+
+  public create = async (req: Request, res: Response) => {
+    try {
+      const { name, user_id } = req.body;
+
+      if (!name || !user_id) {
+        return res.status(400).json({ error: "Nome e user_id são obrigatórios" });
+      }
+
+      if (typeof name !== "string") {
+        return res.status(400).json({ error: "Nome deve ser uma string" });
+      }
+
+      if (name.trim() === "") {
+        return res.status(400).json({ error: "Nome não pode ser vazio" });
+      }
+
+      if (isNaN(Number(user_id))) {
+        return res.status(400).json({ error: "user_id deve ser um número" });
+      }
+
+      const userIdNumber = Number(user_id);
+      const pet = await this.petBusiness.createPet(name, userIdNumber);
+
+      res.status(201).send(pet);
+    } catch (error: any) {
+      if (error.message === "user_id inválido") {
+        return res.status(400).send({ error: error.message });
+      }
+      res.status(500).send({ error: error.message });
+    }
+  };
 }

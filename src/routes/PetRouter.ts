@@ -7,3 +7,4 @@ const petController = new PetController();
 
 petRouter.get("/", petController.getAll);
 petRouter.get("/:id", petController.getById);
+petRouter.post("/", petController.create);

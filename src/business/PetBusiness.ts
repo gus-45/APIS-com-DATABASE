@@ -23,4 +23,20 @@ export class PetBusiness {
       throw new Error(error.message);
     }
   }
+
+  public async createPet(name: string, userId: number): Promise<Pet> {
+    try {
+      const user = await this.userData.getUserById(userId);
+
+      if (!user) {
+        throw new Error("user_id inválido");
+      }
+
+      const pet = await this.petData.createPet(name, userId);
+
+      return pet;
+    } catch (error: any) {
+      throw error;
+    }
+  }
 }
