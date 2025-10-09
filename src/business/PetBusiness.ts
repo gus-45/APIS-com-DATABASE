@@ -39,4 +39,40 @@ export class PetBusiness {
       throw error;
     }
   }
+
+   public async updatePet(petId: number, name: string, userId: number): Promise<Pet> {
+    try {
+      const pet = await this.petData.getPetById(petId);
+
+      if (!pet) {
+        throw new Error("Pet não encontrado");
+      }
+
+      const user = await this.userData.getUserById(userId);
+
+      if (!user) {
+        throw new Error("user_id inválido");
+      }
+
+      await this.petData.updatePet(petId, name, userId);
+
+      return { id: petId, name, user_id: userId };
+    } catch (error: any) {
+      throw error;
+    }
+  }
+
+  public async deletePet(petId: number): Promise<void> {
+    try {
+      const pet = await this.petData.getPetById(petId);
+
+      if (!pet) {
+        throw new Error("Pet não encontrado");
+      }
+
+      await this.petData.deletePet(petId);
+    } catch (error: any) {
+      throw error;
+    }
+  }
 }

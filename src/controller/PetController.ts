@@ -67,4 +67,69 @@ export class PetController {
       res.status(500).send({ error: error.message });
     }
   };
+
+   public update = async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const { name, user_id } = req.body;
+
+      if (!id || isNaN(Number(id))) {
+        return res.status(400).json({
+          error: "ID do pet é obrigatório e deve ser um número",
+        });
+      }
+
+      if (!name || !user_id) {
+        return res.status(400).json({ error: "Nome e user_id são obrigatórios" });
+      }
+
+      if (typeof name !== "string") {
+        return res.status(400).json({ error: "Nome deve ser uma string" });
+      }
+
+      if (name.trim() === "") {
+        return res.status(400).json({ error: "Nome não pode ser vazio" });
+      }
+
+      if (isNaN(Number(user_id))) {
+        return res.status(400).json({ error: "user_id deve ser um número" });
+      }
+
+      const idNumber = Number(id);
+      const userIdNumber = Number(user_id);
+      const pet = await this.petBusiness.updatePet(idNumber, name, userIdNumber);
+
+      res.status(200).send(pet);
+    } catch (error: any) {
+      if (error.message === "Pet não encontrado") {
+        return res.status(404).send({ error: error.message });
+      }
+      if (error.message === "user_id inválido") {
+        return res.status(400).send({ error: error.message });
+      }
+      res.status(500).send({ error: error.message });
+    }
+  };
+
+  public delete = async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+
+      if (!id || isNaN(Number(id))) {
+        return res.status(400).json({
+          error: "ID do pet é obrigatório e deve ser um número",
+        });
+      }
+
+      const idNumber = Number(id);
+      await this.petBusiness.deletePet(idNumber);
+
+      res.status(204).send();
+    } catch (error: any) {
+      if (error.message === "Pet não encontrado") {
+        return res.status(404).send({ error: error.message });
+      }
+      res.status(500).send({ error: error.message });
+    }
+  };
 }
